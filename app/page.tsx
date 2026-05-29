@@ -10,6 +10,8 @@ import ResultsScreen from "@/components/ResultsScreen";
 import { QUESTIONS } from "@/lib/questions";
 import { useAssessment } from "@/lib/useAssessment";
 import { useUtm } from "@/lib/useUtm";
+import { calculateScore, getRiskTier, calculateLoss } from "@/lib/scoring";
+import { submitLead } from "@/app/actions/submitLead";
 import type { LeadFormData } from "@/lib/types";
 
 function getVariants(direction: "forward" | "back") {
@@ -35,10 +37,48 @@ export default function Home() {
   const utmRef = useRef(utms);
   utmRef.current = utms;
 
-  const [leadData, setLeadData] = useState<LeadFormData | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | undefined>();
 
-  function handleEmailSubmit(data: LeadFormData) {
-    setLeadData(data);
+  async function handleEmailSubmit(data: LeadFormData) {
+    setIsSubmitting(true);
+    setSubmitError(undefined);
+
+    const score = calculateScore(answers);
+    const tier = getRiskTier(score);
+    const lossResult = calculateLoss(score, answers.q7_spend_bracket ?? "");
+    const utm = utmRef.current;
+
+    const result = await submitLead({
+      firstName: data.firstName,
+      email: data.email,
+      company: data.company,
+      website: data.website,
+      q1_platform: answers.q1_platform ?? "",
+      q2_conversion_location: answers.q2_conversion_location ?? "",
+      q3_enhanced_conversions: answers.q3_enhanced_conversions ?? "",
+      q4_server_side: answers.q4_server_side ?? "",
+      q5_mobile_share: answers.q5_mobile_share ?? "",
+      q6_pmax: answers.q6_pmax ?? "",
+      q7_spend_bracket: answers.q7_spend_bracket ?? "",
+      signal_score: score,
+      risk_tier: tier,
+      estimated_loss_low: lossResult.low,
+      estimated_loss_high: lossResult.high,
+      utm_source: utm.utm_source,
+      utm_medium: utm.utm_medium,
+      utm_campaign: utm.utm_campaign,
+      utm_content: utm.utm_content,
+      utm_term: utm.utm_term,
+    });
+
+    setIsSubmitting(false);
+
+    if (!result.success) {
+      setSubmitError(result.error);
+      return;
+    }
+
     goNext();
   }
 
@@ -46,9 +86,6 @@ export default function Home() {
   const question = isQuestionStep ? QUESTIONS[currentStep - 1] : null;
   const variants = getVariants(direction);
   const transition = { duration: currentStep === 0 ? 0.2 : 0.15 };
-
-  // leadData and utmRef.current available for Sprint 4 (Supabase + Resend)
-  void leadData;
 
   return (
     <>
@@ -112,7 +149,11 @@ export default function Home() {
               exit="exit"
               transition={transition}
             >
-              <EmailCaptureScreen onSubmit={handleEmailSubmit} />
+              <EmailCaptureScreen
+                onSubmit={handleEmailSubmit}
+                isSubmitting={isSubmitting}
+                serverError={submitError}
+              />
             </motion.div>
           )}
         </AnimatePresence>

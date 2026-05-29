@@ -6,6 +6,8 @@ import { isValidEmail, isWorkEmail } from "@/lib/validateEmail";
 
 interface EmailCaptureScreenProps {
   onSubmit: (data: LeadFormData) => void;
+  isSubmitting?: boolean;
+  serverError?: string;
 }
 
 interface FormErrors {
@@ -42,6 +44,8 @@ const errorStyle: React.CSSProperties = {
 
 export default function EmailCaptureScreen({
   onSubmit,
+  isSubmitting = false,
+  serverError,
 }: EmailCaptureScreenProps) {
   const [form, setForm] = useState<LeadFormData>({
     firstName: "",
@@ -204,32 +208,42 @@ export default function EmailCaptureScreen({
           />
         </div>
 
+        {/* Server error */}
+        {serverError && (
+          <p style={{ ...errorStyle, marginTop: 0 }}>{serverError}</p>
+        )}
+
         {/* Submit */}
         <button
           type="submit"
+          disabled={isSubmitting}
           className="w-full sm:w-auto"
           style={{
-            background: "var(--accent)",
+            background: isSubmitting
+              ? "rgba(0,229,160,0.4)"
+              : "var(--accent)",
             color: "#0A0A0F",
             fontWeight: 600,
             padding: "14px 28px",
             borderRadius: "8px",
             border: "none",
-            cursor: "pointer",
+            cursor: isSubmitting ? "not-allowed" : "pointer",
             fontSize: "1rem",
             marginTop: "4px",
             transition: "background 0.15s ease",
           }}
-          onMouseEnter={(e) =>
-            ((e.currentTarget as HTMLButtonElement).style.background =
-              "var(--accent-hover)")
-          }
-          onMouseLeave={(e) =>
-            ((e.currentTarget as HTMLButtonElement).style.background =
-              "var(--accent)")
-          }
+          onMouseEnter={(e) => {
+            if (!isSubmitting)
+              (e.currentTarget as HTMLButtonElement).style.background =
+                "var(--accent-hover)";
+          }}
+          onMouseLeave={(e) => {
+            if (!isSubmitting)
+              (e.currentTarget as HTMLButtonElement).style.background =
+                "var(--accent)";
+          }}
         >
-          Show me my score →
+          {isSubmitting ? "Saving your results…" : "Show me my score →"}
         </button>
 
         <p style={{ fontSize: "0.8125rem", color: "var(--text-muted)" }}>
