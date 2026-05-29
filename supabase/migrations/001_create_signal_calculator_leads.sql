@@ -1,0 +1,23 @@
+create table signal_calculator_leads (
+  id uuid default gen_random_uuid() primary key,
+  created_at timestamptz default now(),
+  first_name text not null,
+  email text not null,
+  company text not null,
+  website text,
+  q1_platform text,
+  q2_conversion_location text,
+  q3_enhanced_conversions text,
+  q4_server_side text,
+  q5_mobile_share text,
+  q6_pmax text,
+  q7_spend_bracket text,
+  signal_score integer,
+  risk_tier text,
+  estimated_loss_low integer,
+  estimated_loss_high integer,
+  utm_source text,
+  utm_medium text,
+  utm_campaign text,
+  ip_country text
+);

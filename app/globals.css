@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Backgrounds */
+  --bg-primary: #0A0A0F;
+  --bg-card: #12121A;
+  --bg-card-hover: #1A1A26;
+
+  /* Accent */
+  --accent: #00E5A0;
+  --accent-dim: rgba(0, 229, 160, 0.1);
+  --accent-hover: #00CCB8;
+
+  /* Text */
+  --text-primary: #FFFFFF;
+  --text-muted: #6B7280;
+  --text-secondary: #9CA3AF;
+
+  /* Borders */
+  --border: rgba(255, 255, 255, 0.08);
+  --border-selected: #00E5A0;
+
+  /* Risk tiers */
+  --risk-optimised: #00E5A0;
+  --risk-partial: #F5A623;
+  --risk-atrisk: #E05C5C;
+  --risk-critical: #CC2222;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-inter), sans-serif;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
